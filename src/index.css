@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@import "./styles/themes.css";
+@import "./styles/print.css";
+
+/* highlight.js — GitHub-style code theme */
+@import "highlight.js/styles/github.min.css";

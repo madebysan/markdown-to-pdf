@@ -1,0 +1,125 @@
+/* Theme CSS custom properties — set dynamically via JS on the preview element */
+/* These provide the bridge between theme JS objects and CSS rendering */
+
+.themed-preview {
+  background-color: var(--theme-bg, #ffffff);
+  color: var(--theme-text, #111111);
+  font-family: var(--theme-body-font);
+  font-size: var(--theme-body-size, 1rem);
+  max-width: var(--theme-content-max-width, 48rem);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Headings */
+.themed-preview h1,
+.themed-preview h2,
+.themed-preview h3,
+.themed-preview h4,
+.themed-preview h5,
+.themed-preview h6 {
+  font-family: var(--theme-heading-font);
+  font-weight: var(--theme-heading-weight, 700);
+  color: var(--theme-heading, #111111);
+}
+
+/* Playful theme — colorful headings */
+.themed-preview h1 { color: var(--theme-h1-color, var(--theme-heading)); }
+.themed-preview h2 { color: var(--theme-h2-color, var(--theme-heading)); }
+.themed-preview h3 { color: var(--theme-h3-color, var(--theme-heading)); }
+
+/* Scale headings relative to body size (em not rem) so font size toggle affects everything */
+.themed-preview h1 {
+  font-size: calc(2em * var(--theme-heading-scale, 1.25));
+}
+.themed-preview h2 {
+  font-size: calc(1.5em * var(--theme-heading-scale, 1.25));
+}
+.themed-preview h3 {
+  font-size: calc(1.25em * var(--theme-heading-scale, 1.25));
+}
+
+/* Links */
+.themed-preview a {
+  color: var(--theme-accent, #2563eb);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Blockquotes */
+.themed-preview blockquote {
+  border-left: 3px solid var(--theme-blockquote-border, #d1d5db);
+  color: var(--theme-blockquote-text, #4b5563);
+  padding-left: 1rem;
+}
+
+/* Code blocks */
+.themed-preview pre {
+  background-color: var(--theme-code-bg, #f3f4f6) !important;
+  border: 1px solid var(--theme-border, #e5e7eb);
+  border-radius: 0.375rem;
+  overflow-x: auto;
+}
+
+.themed-preview code {
+  font-family: var(--theme-code-font);
+  font-size: 0.875em;
+}
+
+.themed-preview :not(pre) > code {
+  background-color: var(--theme-code-bg, #f3f4f6);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+/* Tables */
+.themed-preview table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.themed-preview th,
+.themed-preview td {
+  border: 1px solid var(--theme-border, #e5e7eb);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.themed-preview th {
+  font-weight: 600;
+  background-color: var(--theme-code-bg, #f3f4f6);
+}
+
+/* Task lists (checkboxes) */
+.themed-preview ul:has(input[type="checkbox"]) {
+  list-style: none;
+  padding-left: 0;
+}
+
+.themed-preview input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+/* Horizontal rule */
+.themed-preview hr {
+  border-color: var(--theme-border, #e5e7eb);
+}
+
+/* Bold/strong text — inherit theme color instead of browser default black */
+.themed-preview strong {
+  color: var(--theme-heading, inherit);
+}
+
+/* Muted text */
+.themed-preview .text-muted {
+  color: var(--theme-muted, #6b7280);
+}
+
+/* Bold theme — extra thick border on blockquotes and hr */
+.theme-bold .themed-preview blockquote {
+  border-left-width: 5px;
+}
+
+.theme-bold .themed-preview hr {
+  border-width: 2px;
+  border-color: var(--theme-text);
+}

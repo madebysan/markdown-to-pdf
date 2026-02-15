@@ -1,0 +1,9 @@
+/* Minimal print fallback — PDF export is handled by html-to-image + jsPDF */
+/* This only applies if someone uses the browser's native Cmd+P */
+
+@media print {
+  @page {
+    margin: 0.75in 1in;
+    size: letter;
+  }
+}
