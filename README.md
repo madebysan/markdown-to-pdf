@@ -2,6 +2,8 @@
 
 Paste markdown, pick a theme, download a beautiful PDF. Everything runs client-side in the browser — no server, no accounts, no data leaves your machine.
 
+**Try it:** https://web-markdown-to-pdf.vercel.app
+
 ## Features
 
 - **6 themes** — Clean, Editorial, Mono, Warm, Bold, Playful
