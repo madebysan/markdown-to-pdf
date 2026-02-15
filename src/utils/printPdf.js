@@ -2,63 +2,96 @@ import { toPng } from 'html-to-image'
 import { jsPDF } from 'jspdf'
 
 // Export the preview as a PDF using html-to-image + jsPDF
-// html-to-image uses the browser's native renderer (SVG foreignObject),
-// so it handles all modern CSS including oklch colors from Tailwind v4.
-// Downloads directly as a .pdf file — no print dialog.
+// Constrains the element to PDF content width before capture so text and
+// tables fit correctly, then slices the tall image into pages.
 export async function printPdf(theme) {
   const element = document.getElementById('pdf-content')
   if (!element) return
 
-  // Capture the full preview as a high-res PNG
+  // PDF dimensions in inches
+  const marginIn = 0.5
+  const pageWidthIn = 8.5
+  const pageHeightIn = 11
+  const contentWidthPx = (pageWidthIn - marginIn * 2) * 96 // 720px at 96dpi
+  const pixelRatio = 2
+
+  // Save original styles so we can restore after capture
+  const saved = {
+    width: element.style.width,
+    maxWidth: element.style.maxWidth,
+    padding: element.style.padding,
+  }
+
+  // Temporarily constrain element to exact PDF content width
+  // This ensures tables, code blocks, etc. wrap to fit the page
+  element.style.width = `${contentWidthPx}px`
+  element.style.maxWidth = `${contentWidthPx}px`
+  element.style.padding = '32px'
+
+  // Wait a frame for the browser to reflow at the new width
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+
+  // Capture the full content as a high-res PNG
   const dataUrl = await toPng(element, {
-    pixelRatio: 2, // 2x for sharp text
+    pixelRatio,
+    width: contentWidthPx,
     cacheBust: true,
+    backgroundColor: '#ffffff',
   })
 
-  // Load the image to get its dimensions
+  // Restore original styles immediately
+  element.style.width = saved.width
+  element.style.maxWidth = saved.maxWidth
+  element.style.padding = saved.padding
+
+  // Load the captured image
   const img = new Image()
   img.src = dataUrl
   await new Promise((resolve) => { img.onload = resolve })
 
-  // Set up PDF — letter size, points as unit
+  // PDF setup in points (72pt = 1 inch)
   const pdf = new jsPDF('p', 'pt', 'letter')
-  const pageWidth = pdf.internal.pageSize.getWidth()   // 612pt
-  const pageHeight = pdf.internal.pageSize.getHeight()  // 792pt
-  const margin = 36 // 0.5 inch
+  const pageWidthPt = pdf.internal.pageSize.getWidth()   // 612pt
+  const pageHeightPt = pdf.internal.pageSize.getHeight()  // 792pt
+  const marginPt = marginIn * 72                          // 36pt
+  const contentWidthPt = pageWidthPt - marginPt * 2       // 540pt
+  const contentHeightPt = pageHeightPt - marginPt * 2     // 720pt
 
-  const contentWidth = pageWidth - margin * 2
-  const scale = contentWidth / img.width
-  const scaledFullHeight = img.height * scale
-  const maxContentHeight = pageHeight - margin * 2
+  // Scale factor: captured image pixels → PDF points
+  const scale = contentWidthPt / img.width
+  const totalScaledHeight = img.height * scale
 
-  // If it fits on one page, simple case
-  if (scaledFullHeight <= maxContentHeight) {
-    pdf.addImage(dataUrl, 'PNG', margin, margin, contentWidth, scaledFullHeight)
+  if (totalScaledHeight <= contentHeightPt) {
+    // Fits on one page
+    pdf.addImage(dataUrl, 'PNG', marginPt, marginPt, contentWidthPt, totalScaledHeight)
   } else {
-    // Multi-page: slice the source image into page-sized chunks
-    let sourceY = 0
-    let page = 0
-    const sourceSliceHeight = maxContentHeight / scale // how many source pixels per page
+    // Multi-page: how many source pixels fit per page
+    const sourcePixelsPerPage = Math.floor(contentHeightPt / scale)
+    const totalPages = Math.ceil(img.height / sourcePixelsPerPage)
 
-    while (sourceY < img.height) {
+    for (let page = 0; page < totalPages; page++) {
       if (page > 0) pdf.addPage()
 
-      const remainingSourceHeight = img.height - sourceY
-      const thisSliceHeight = Math.min(sourceSliceHeight, remainingSourceHeight)
+      const sourceY = page * sourcePixelsPerPage
+      const sourceH = Math.min(sourcePixelsPerPage, img.height - sourceY)
 
-      // Draw just this page's slice onto a temp canvas
+      // Create a canvas for this page's slice
       const canvas = document.createElement('canvas')
       canvas.width = img.width
-      canvas.height = thisSliceHeight
+      canvas.height = sourceH
       const ctx = canvas.getContext('2d')
-      ctx.drawImage(img, 0, sourceY, img.width, thisSliceHeight, 0, 0, img.width, thisSliceHeight)
 
-      const sliceDataUrl = canvas.toDataURL('image/png')
-      const scaledSliceHeight = thisSliceHeight * scale
-      pdf.addImage(sliceDataUrl, 'PNG', margin, margin, contentWidth, scaledSliceHeight)
+      // White background to avoid any transparency artifacts
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      sourceY += thisSliceHeight
-      page++
+      // Draw the slice from the source image
+      ctx.drawImage(img, 0, sourceY, img.width, sourceH, 0, 0, img.width, sourceH)
+
+      const sliceUrl = canvas.toDataURL('image/jpeg', 0.95)
+      const sliceHeightPt = sourceH * scale
+
+      pdf.addImage(sliceUrl, 'JPEG', marginPt, marginPt, contentWidthPt, sliceHeightPt)
     }
   }
 
