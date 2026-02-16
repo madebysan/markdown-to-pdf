@@ -1,8 +1,9 @@
-# markdown.pdf
+<h1 align="center">markdown.pdf</h1>
 
-Paste markdown, pick a theme, download a beautiful PDF. Everything runs client-side in the browser — no server, no accounts, no data leaves your machine.
+<p align="center">Paste markdown, pick a theme, download a beautiful PDF.<br>
+Client-side — no server, no accounts, no data leaves your machine.</p>
 
-**Try it:** https://markdown-to-pdf.vercel.app
+<p align="center"><a href="https://markdown-to-pdf.vercel.app"><strong>Try it live →</strong></a></p>
 
 ## Features
 
