@@ -3,7 +3,7 @@
 <p align="center">Paste markdown, pick a theme, download a beautiful PDF.<br>
 Client-side — no server, no accounts, no data leaves your machine.</p>
 
-<p align="center"><a href="https://markdown-to-pdf.vercel.app"><strong>Try it live →</strong></a></p>
+<p align="center"><a href="https://web-markdown-to-pdf.vercel.app/"><strong>Try it live →</strong></a></p>
 
 ## Features
 
