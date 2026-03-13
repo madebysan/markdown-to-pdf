@@ -1,19 +1,19 @@
 <h1 align="center">markdown.pdf</h1>
 
 <p align="center">Paste markdown, pick a theme, download a beautiful PDF.<br>
-Client-side — no server, no accounts, no data leaves your machine.</p>
+Client-side – no server, no accounts, no data leaves your machine.</p>
 
 <p align="center"><a href="https://web-markdown-to-pdf.vercel.app/"><strong>Try it live →</strong></a></p>
 
 ## Features
 
-- **6 themes** — Clean, Editorial, Mono, Warm, Bold, Playful
-- **Live preview** — side-by-side editor with instant rendering
-- **Direct PDF download** — no print dialog, backgrounds and colors preserved
-- **Font size control** — Small, Medium, Large toggle
-- **GFM support** — tables, task lists, strikethrough
-- **Syntax highlighting** — code blocks with automatic language detection
-- **Mobile friendly** — edit/preview tab toggle on small screens
+- **6 themes** – Clean, Editorial, Mono, Warm, Bold, Playful
+- **Live preview** – side-by-side editor with instant rendering
+- **Direct PDF download** – no print dialog, backgrounds and colors preserved
+- **Font size control** – Small, Medium, Large toggle
+- **GFM support** – tables, task lists, strikethrough
+- **Syntax highlighting** – code blocks with automatic language detection
+- **Mobile friendly** – edit/preview tab toggle on small screens
 
 ## Themes
 
