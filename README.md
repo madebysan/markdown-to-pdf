@@ -1,9 +1,16 @@
-<h1 align="center">markdown.pdf</h1>
+<h1>markdown.pdf</h1>
 
-<p align="center">Paste markdown, pick a theme, download a beautiful PDF.<br>
-Client-side – no server, no accounts, no data leaves your machine.</p>
+<p>Paste markdown, pick a theme, download a beautiful PDF.<br>
+Client-side, no server, no accounts, no data leaves your machine.</p>
 
-<p align="center"><a href="https://web-markdown-to-pdf.vercel.app/"><strong>Try it live →</strong></a></p>
+<p>
+  <img src="https://img.shields.io/badge/React-61dafb" alt="React">
+  <img src="https://img.shields.io/badge/Vite-646cff" alt="Vite">
+  <img src="https://img.shields.io/badge/Tailwind-38bdf8" alt="Tailwind">
+  <img src="https://img.shields.io/badge/Vercel-000000" alt="Vercel">
+</p>
+
+<p><a href="https://web-markdown-to-pdf.vercel.app/">Try it live →</a></p>
 
 ## Features
 
