@@ -1,99 +1,149 @@
-import { toPng } from 'html-to-image'
-import { jsPDF } from 'jspdf'
+// Export the preview as a PDF using html-to-image + jsPDF.
+// Renders an off-screen copy of the preview at the PDF content width, captures it
+// as one tall image, then slices it into pages. Page breaks land between lines and
+// blocks (never through a line of text) and never right after a heading.
 
-// Export the preview as a PDF using html-to-image + jsPDF
-// Constrains the element to PDF content width before capture so text and
-// tables fit correctly, then slices the tall image into pages.
+// Letter page, 0.5in margins, 96 CSS px per inch
+const marginIn = 0.5
+const pageWidthIn = 8.5
+const pageHeightIn = 11
+const contentWidthPx = (pageWidthIn - marginIn * 2) * 96 // 720px
+const contentHeightPx = (pageHeightIn - marginIn * 2) * 96 // 960px
+const pixelRatio = 2
+
 export async function printPdf(theme) {
-  const element = document.getElementById('pdf-content')
-  if (!element) return
+  const source = document.getElementById('pdf-content')
+  if (!source) throw new Error('Preview not found')
 
-  // PDF dimensions in inches
-  const marginIn = 0.5
-  const pageWidthIn = 8.5
-  const pageHeightIn = 11
-  const contentWidthPx = (pageWidthIn - marginIn * 2) * 96 // 720px at 96dpi
-  const pixelRatio = 2
+  // Loaded on demand so the editor opens faster
+  const [{ toPng }, { jsPDF }] = await Promise.all([import('html-to-image'), import('jspdf')])
 
-  // Save original styles so we can restore after capture
-  const saved = {
-    width: element.style.width,
-    maxWidth: element.style.maxWidth,
-    padding: element.style.padding,
-  }
-
-  // Temporarily constrain element to exact PDF content width
-  // This ensures tables, code blocks, etc. wrap to fit the page
+  // Off-screen copy at the exact PDF width. Works even when the preview is hidden
+  // (the Edit tab on phones) and never disturbs what the user is looking at.
+  const host = document.createElement('div')
+  host.style.cssText = `position:fixed;left:-100000px;top:0;width:${contentWidthPx}px;`
+  const element = source.cloneNode(true)
+  element.removeAttribute('id')
   element.style.width = `${contentWidthPx}px`
   element.style.maxWidth = `${contentWidthPx}px`
   element.style.padding = '32px'
+  element.style.margin = '0'
+  host.appendChild(element)
+  document.body.appendChild(host)
 
-  // Wait a frame for the browser to reflow at the new width
-  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+  try {
+    await document.fonts.ready
+    // Wait a frame for layout at the new width
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
 
-  // Capture the full content as a high-res PNG
-  const dataUrl = await toPng(element, {
-    pixelRatio,
-    width: contentWidthPx,
-    cacheBust: true,
-    backgroundColor: '#ffffff',
-  })
+    const breaks = collectBreakPoints(element)
+    const totalHeightPx = element.offsetHeight
 
-  // Restore original styles immediately
-  element.style.width = saved.width
-  element.style.maxWidth = saved.maxWidth
-  element.style.padding = saved.padding
+    const dataUrl = await toPng(element, {
+      pixelRatio,
+      width: contentWidthPx,
+      height: totalHeightPx,
+      cacheBust: true,
+      backgroundColor: theme.colors['--theme-bg'] || '#ffffff',
+    })
 
-  // Load the captured image
-  const img = new Image()
-  img.src = dataUrl
-  await new Promise((resolve) => { img.onload = resolve })
+    const img = new Image()
+    img.src = dataUrl
+    await img.decode()
 
-  // PDF setup in points (72pt = 1 inch)
-  const pdf = new jsPDF('p', 'pt', 'letter')
-  const pageWidthPt = pdf.internal.pageSize.getWidth()   // 612pt
-  const pageHeightPt = pdf.internal.pageSize.getHeight()  // 792pt
-  const marginPt = marginIn * 72                          // 36pt
-  const contentWidthPt = pageWidthPt - marginPt * 2       // 540pt
-  const contentHeightPt = pageHeightPt - marginPt * 2     // 720pt
+    // PDF in points (72pt = 1 inch)
+    const pdf = new jsPDF('p', 'pt', 'letter')
+    const marginPt = marginIn * 72
+    const contentWidthPt = pdf.internal.pageSize.getWidth() - marginPt * 2
+    const ptPerCssPx = contentWidthPt / contentWidthPx
+    const imgPxPerCssPx = img.width / contentWidthPx
 
-  // Scale factor: captured image pixels → PDF points
-  const scale = contentWidthPt / img.width
-  const totalScaledHeight = img.height * scale
-
-  if (totalScaledHeight <= contentHeightPt) {
-    // Fits on one page
-    pdf.addImage(dataUrl, 'PNG', marginPt, marginPt, contentWidthPt, totalScaledHeight)
-  } else {
-    // Multi-page: how many source pixels fit per page
-    const sourcePixelsPerPage = Math.floor(contentHeightPt / scale)
-    const totalPages = Math.ceil(img.height / sourcePixelsPerPage)
-
-    for (let page = 0; page < totalPages; page++) {
-      if (page > 0) pdf.addPage()
-
-      const sourceY = page * sourcePixelsPerPage
-      const sourceH = Math.min(sourcePixelsPerPage, img.height - sourceY)
-
-      // Create a canvas for this page's slice
+    const pages = paginate(breaks, totalHeightPx)
+    pages.forEach(([start, end], i) => {
+      if (i > 0) pdf.addPage()
+      const sy = Math.round(start * imgPxPerCssPx)
+      const sh = Math.min(Math.round(end * imgPxPerCssPx), img.height) - sy
       const canvas = document.createElement('canvas')
       canvas.width = img.width
-      canvas.height = sourceH
+      canvas.height = sh
       const ctx = canvas.getContext('2d')
-
-      // White background to avoid any transparency artifacts
       ctx.fillStyle = '#ffffff'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(img, 0, sy, img.width, sh, 0, 0, img.width, sh)
+      const slice = canvas.toDataURL('image/jpeg', 0.95)
+      pdf.addImage(slice, 'JPEG', marginPt, marginPt, contentWidthPt, (sh / imgPxPerCssPx) * ptPerCssPx)
+    })
 
-      // Draw the slice from the source image
-      ctx.drawImage(img, 0, sourceY, img.width, sourceH, 0, 0, img.width, sourceH)
+    pdf.save(`${fileName(source)}.pdf`)
+  } finally {
+    host.remove()
+  }
+}
 
-      const sliceUrl = canvas.toDataURL('image/jpeg', 0.95)
-      const sliceHeightPt = sourceH * scale
+// Y positions (CSS px from the top of `root`) where a page may safely end.
+// Each candidate is { y, next } where `next` is where the following page starts,
+// so the gap between blocks isn't repeated at the top of the next page.
+function collectBreakPoints(root) {
+  const top = root.getBoundingClientRect().top
+  const blocks = root.querySelectorAll('p, li, tr, pre, blockquote, hr, img, h1, h2, h3, h4, h5, h6, table, ul, ol')
+  const rects = []
+  blocks.forEach((el) => {
+    const r = el.getBoundingClientRect()
+    rects.push({ top: r.top - top, bottom: r.bottom - top, heading: /^H[1-6]$/.test(el.tagName) })
+  })
 
-      pdf.addImage(sliceUrl, 'JPEG', marginPt, marginPt, contentWidthPt, sliceHeightPt)
-    }
+  const candidates = []
+  for (const r of rects) {
+    if (r.heading) continue // keep headings with what follows
+    const nextTop = rects.reduce((min, o) => (o.top >= r.bottom - 0.5 && o.top < min ? o.top : min), Infinity)
+    candidates.push({ y: r.bottom, next: Number.isFinite(nextTop) ? nextTop : r.bottom })
   }
 
-  pdf.save(`markdown-pdf-${theme.id}.pdf`)
+  // Line boundaries inside paragraphs, list items and code blocks, so a long block can split
+  // between lines instead of through one
+  root.querySelectorAll('p, li, pre').forEach((el) => {
+    if (el.tagName === 'LI' && el.querySelector('p, ul, ol, pre, table, blockquote')) return
+    const style = getComputedStyle(el)
+    const text = el.tagName === 'PRE' ? getComputedStyle(el.querySelector('code') || el) : style
+    const lineHeight = parseFloat(text.lineHeight) || parseFloat(text.fontSize) * 1.5
+    const r = el.getBoundingClientRect()
+    const start = r.top - top + parseFloat(style.paddingTop) + parseFloat(style.borderTopWidth)
+    const end = r.bottom - top - parseFloat(style.paddingBottom)
+    for (let y = start + lineHeight; y < end - lineHeight / 2; y += lineHeight) {
+      candidates.push({ y, next: y })
+    }
+  })
+
+  return candidates.sort((a, b) => a.y - b.y)
+}
+
+// Turn break candidates into [start, end] ranges no taller than one page
+function paginate(candidates, totalHeight) {
+  const pages = []
+  let start = 0
+  while (totalHeight - start > contentHeightPx) {
+    const limit = start + contentHeightPx
+    let best = null
+    for (const c of candidates) {
+      if (c.y > limit) break
+      if (c.y > start + contentHeightPx * 0.4) best = c // don't leave a page mostly empty
+    }
+    if (!best) {
+      // Nothing safe to break on (e.g. a very tall image): cut at the page edge
+      pages.push([start, limit])
+      start = limit
+    } else {
+      pages.push([start, best.y])
+      start = Math.min(best.next, best.y + contentHeightPx)
+    }
+  }
+  pages.push([start, totalHeight])
+  return pages
+}
+
+// File name from the document's first heading, e.g. "Quarterly Report.pdf"
+function fileName(root) {
+  const heading = root.querySelector('h1, h2, h3')?.textContent?.trim()
+  const clean = heading?.replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ').replace(/\.pdf$/i, '').slice(0, 80).trim()
+  return clean || 'markdown'
 }

@@ -10,17 +10,19 @@ Client-side, no server, no accounts, no data leaves your machine.</p>
   <img src="https://img.shields.io/badge/Vercel-000000" alt="Vercel">
 </p>
 
-<p><a href="https://web-markdown-to-pdf.vercel.app/">Try it live →</a></p>
+<p><a href="https://markdown.santiagoalonso.com/">Try it live →</a></p>
 
 ## Features
 
 - **6 themes** – Clean, Editorial, Mono, Warm, Bold, Playful
 - **Live preview** – side-by-side editor with instant rendering
-- **Direct PDF download** – no print dialog, backgrounds and colors preserved
+- **Direct PDF download** – no print dialog, backgrounds and colors preserved, named after your first heading
+- **Clean page breaks** – pages end between lines and blocks, never through a line or right after a heading
+- **Remembers your work** – text, theme and size are kept in your browser between visits
 - **Font size control** – Small, Medium, Large toggle
 - **GFM support** – tables, task lists, strikethrough
 - **Syntax highlighting** – code blocks with automatic language detection
-- **Mobile friendly** – edit/preview tab toggle on small screens
+- **Mobile friendly** – edit/preview tab toggle on small screens; download works from either tab
 
 ## Themes
 
@@ -32,6 +34,11 @@ Client-side, no server, no accounts, no data leaves your machine.</p>
 | **Warm** | Merriweather, earthy brown/terracotta text |
 | **Bold** | Inter weight 900, huge headings, red accent |
 | **Playful** | Nunito, colorful headings (purple, teal, pink) |
+
+## Limitations
+
+- The PDF is an image of each page, so text can't be selected or searched and links aren't clickable.
+- Fonts for the themed styles load from Google Fonts.
 
 ## Tech Stack
 

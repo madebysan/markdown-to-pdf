@@ -8,6 +8,9 @@ export default function Header({ theme }) {
     setExporting(true)
     try {
       await printPdf(theme)
+    } catch (err) {
+      console.error(err)
+      window.alert("Couldn't create the PDF. Try again, or reload the page.")
     } finally {
       setExporting(false)
     }

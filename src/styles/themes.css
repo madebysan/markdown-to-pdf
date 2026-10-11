@@ -71,6 +71,20 @@
   border-radius: 0.25rem;
 }
 
+/* Let the code block's own background show (highlight.js paints a white box otherwise) */
+.themed-preview pre code.hljs {
+  background: transparent;
+  padding: 0;
+}
+
+/* The typography plugin adds quote marks and backticks; show the text as written */
+.themed-preview blockquote p::before,
+.themed-preview blockquote p::after,
+.themed-preview code::before,
+.themed-preview code::after {
+  content: none;
+}
+
 /* Tables */
 .themed-preview table {
   border-collapse: collapse;
@@ -115,11 +129,11 @@
 }
 
 /* Bold theme — extra thick border on blockquotes and hr */
-.theme-bold .themed-preview blockquote {
+.themed-preview.theme-bold blockquote {
   border-left-width: 5px;
 }
 
-.theme-bold .themed-preview hr {
+.themed-preview.theme-bold hr {
   border-width: 2px;
   border-color: var(--theme-text);
 }

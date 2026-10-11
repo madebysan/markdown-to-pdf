@@ -12,10 +12,30 @@ const fontSizes = [
   { id: 'big', label: 'L', rem: '1rem' },
 ]
 
+// Work is kept in this browser only, so a refresh doesn't lose it
+const STORAGE_KEY = 'markdown-pdf:v1'
+
+function loadSaved() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}
+  } catch {
+    return {}
+  }
+}
+
 export default function App() {
-  const [markdown, setMarkdown] = useState(defaultMarkdown)
-  const [theme, setTheme] = useState(themes[0]) // Clean is default
-  const [fontSize, setFontSize] = useState(fontSizes[1]) // Medium default
+  const [saved] = useState(loadSaved)
+  const [markdown, setMarkdown] = useState(saved.markdown ?? defaultMarkdown)
+  const [theme, setTheme] = useState(() => themes.find((t) => t.id === saved.theme) || themes[0]) // Clean is default
+  const [fontSize, setFontSize] = useState(() => fontSizes.find((f) => f.id === saved.fontSize) || fontSizes[1]) // Medium default
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ markdown, theme: theme.id, fontSize: fontSize.id }))
+    } catch {
+      // Storage full or blocked: the editor still works, it just won't remember
+    }
+  }, [markdown, theme, fontSize])
 
   // Load Google Fonts whenever theme changes
   useEffect(() => {

@@ -7,7 +7,7 @@ export default function EditorLayout({ markdown, onChange, theme, fontSize }) {
   const [activeTab, setActiveTab] = useState('edit')
 
   return (
-    <div className="flex-1 px-4 py-4 min-h-0">
+    <div className="flex-1 px-4 py-4 min-h-0 flex flex-col">
       {/* Mobile tab switcher */}
       <div className="flex md:hidden mb-2 gap-1 bg-gray-100 rounded-lg p-1">
         <button
@@ -32,19 +32,15 @@ export default function EditorLayout({ markdown, onChange, theme, fontSize }) {
         </button>
       </div>
 
-      {/* Desktop: side-by-side grid */}
-      <div className="hidden md:grid md:grid-cols-2 gap-4 h-full">
-        <MarkdownInput value={markdown} onChange={onChange} />
-        <MarkdownPreview markdown={markdown} theme={theme} fontSize={fontSize} />
-      </div>
-
-      {/* Mobile: show active tab */}
-      <div className="md:hidden h-full">
-        {activeTab === 'edit' ? (
+      {/* Side by side on desktop; one tab at a time on mobile. Each pane renders once,
+          so the PDF export always finds the preview. */}
+      <div className="flex-1 min-h-0 md:grid md:grid-cols-2 gap-4">
+        <div className={`h-full min-h-0 ${activeTab === 'edit' ? '' : 'hidden'} md:block`}>
           <MarkdownInput value={markdown} onChange={onChange} />
-        ) : (
+        </div>
+        <div className={`h-full min-h-0 ${activeTab === 'preview' ? '' : 'hidden'} md:block`}>
           <MarkdownPreview markdown={markdown} theme={theme} fontSize={fontSize} />
-        )}
+        </div>
       </div>
     </div>
   )

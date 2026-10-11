@@ -16,7 +16,7 @@ Convert your markdown to beautifully themed PDFs — right in the browser.
 
 - **6 beautiful themes** — from clean and professional to playful and colorful
 - **Live preview** — what you see is what you get
-- **Print-quality PDF** — vector text, selectable, crisp at any zoom
+- **One-click PDF** — no print dialog, page breaks between lines
 - **Zero server** — everything happens in your browser
 
 ## Code Example
