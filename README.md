@@ -10,7 +10,7 @@ Client-side, no server, no accounts, no data leaves your machine.</p>
   <img src="https://img.shields.io/badge/Vercel-000000" alt="Vercel">
 </p>
 
-<p><a href="https://markdown.santiagoalonso.com/">Try it live →</a></p>
+<p><a href="https://markdown.santiagoalonso.com/">Try it live</a></p>
 
 ## Features
 
