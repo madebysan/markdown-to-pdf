@@ -12,6 +12,8 @@ Client-side, no server, no accounts, no data leaves your machine.</p>
 
 <p><a href="https://markdown.santiagoalonso.com/">Try it live</a></p>
 
+![markdown.pdf with its theme picker, the Markdown editor and the live preview](assets/screenshot.png)
+
 ## Features
 
 - **6 themes** – Clean, Editorial, Mono, Warm, Bold, Playful
