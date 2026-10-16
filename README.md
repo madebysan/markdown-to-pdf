@@ -1,7 +1,7 @@
 <h1>markdown.pdf</h1>
 
-<p>Paste markdown, pick a theme, download a beautiful PDF.<br>
-Client-side, no server, no accounts, no data leaves your machine.</p>
+<p>Paste Markdown, pick a theme, download a PDF.<br>
+Everything runs in your browser, with no server or account.</p>
 
 <p>
   <img src="https://img.shields.io/badge/React-61dafb" alt="React">
@@ -14,66 +14,26 @@ Client-side, no server, no accounts, no data leaves your machine.</p>
 
 ![markdown.pdf with its theme picker, the Markdown editor and the live preview](assets/screenshot.png)
 
-## Features
+markdown.pdf turns a Markdown file into a styled PDF without a print dialog.
 
-- **6 themes** – Clean, Editorial, Mono, Warm, Bold, Playful
-- **Live preview** – side-by-side editor with instant rendering
-- **Direct PDF download** – no print dialog, backgrounds and colors preserved, named after your first heading
-- **Clean page breaks** – pages end between lines and blocks, never through a line or right after a heading
-- **Remembers your work** – text, theme and size are kept in your browser between visits
-- **Font size control** – Small, Medium, Large toggle
-- **GFM support** – tables, task lists, strikethrough
-- **Syntax highlighting** – code blocks with automatic language detection
-- **Mobile friendly** – edit/preview tab toggle on small screens; download works from either tab
+- Six themes, from plain Clean to serif Editorial and colorful Playful.
+- Pages break between lines and blocks, never mid-line or right after a heading.
+- Tables, task lists and highlighted code blocks come through.
 
-## Themes
+## How it works
 
-| Theme | Style |
-|-------|-------|
-| **Clean** | System fonts, black on white, no decoration |
-| **Editorial** | Lora + Source Sans 3, elegant serif, brown accent |
-| **Mono** | JetBrains Mono, green accent |
-| **Warm** | Merriweather, earthy brown/terracotta text |
-| **Bold** | Inter weight 900, huge headings, red accent |
-| **Playful** | Nunito, colorful headings (purple, teal, pink) |
+Type or paste on the left and the preview updates on the right; on a phone, a tab switches between them. Pick a theme and a font size, then download: the file is named after your first heading. Your text, theme and size stay in the browser for your next visit.
 
-## Limitations
+## Limits
 
-- The PDF is an image of each page, so text can't be selected or searched and links aren't clickable.
-- Fonts for the themed styles load from Google Fonts.
+Each page is saved as an image, so text in the PDF can't be selected or searched and links don't work. Theme fonts load from Google Fonts.
 
-## Tech Stack
+## Install
 
-- Vite + React 19 + Tailwind CSS v4
-- `react-markdown` + `remark-gfm` + `rehype-highlight`
-- `html-to-image` + `jsPDF` for PDF export
-- Google Fonts loaded on-demand per theme
-
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
-Open `http://localhost:5173`
-
-## Build
-
-```bash
-npm run build
-```
-
-Output goes to `dist/`.
-
-## Feedback
-
-Found a bug or have a feature idea? [Open an issue](https://github.com/madebysan/markdown-to-pdf/issues).
-
-## License
-
-[MIT](LICENSE)
+Use it at [markdown.santiagoalonso.com](https://markdown.santiagoalonso.com/), or run it locally with `npm install` and `npm run dev`. It uses [react-markdown](https://github.com/remarkjs/react-markdown), [html-to-image](https://github.com/bubkoo/html-to-image) and [jsPDF](https://github.com/parallax/jsPDF).
 
 ---
+
+[MIT](LICENSE)
 
 Made by [santiagoalonso.com](https://santiagoalonso.com)
